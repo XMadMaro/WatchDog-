@@ -11,6 +11,29 @@ interface Props {
 export const ScandalResult: React.FC<Props> = ({ strategy, onReset }) => {
   const [activeTab, setActiveTab] = useState<'article' | 'email' | 'social'>('article');
 
+  const handleShare = async () => {
+    const shareText = `🔥 AFERA: ${strategy.headline}\n\n${strategy.articleContent}\n\n${strategy.hashtags.map(t => t.startsWith('#') ? t : `#${t}`).join(' ')}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: strategy.headline,
+          text: shareText,
+          // url: window.location.href // Optional: include if the app had persistent URLs
+        });
+      } catch (err) {
+        console.error('Share failed:', err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        alert('Skopiowano treść kampanii do schowka!'); 
+      } catch (err) {
+        console.error('Clipboard failed:', err);
+      }
+    }
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-10 duration-700">
       
@@ -98,7 +121,10 @@ export const ScandalResult: React.FC<Props> = ({ strategy, onReset }) => {
                 <div className="bg-slate-100 text-slate-900 p-6 rounded border border-slate-300 font-serif whitespace-pre-line">
                     {strategy.officialComplaint.body}
                 </div>
-                <button className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+                <button 
+                  onClick={() => navigator.clipboard.writeText(`${strategy.officialComplaint.subject}\n\n${strategy.officialComplaint.body}`).then(() => alert('Skopiowano treść emaila!'))}
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"
+                >
                     <Icons.Mail className="w-4 h-4" /> Kopiuj Treść Skargi
                 </button>
             </div>
@@ -113,7 +139,10 @@ export const ScandalResult: React.FC<Props> = ({ strategy, onReset }) => {
                         <span className="font-bold text-sm">Post na X (Twitter)</span>
                     </div>
                     <p className="text-white text-lg mb-4">{strategy.socialContent.twitterPost}</p>
-                    <button className="text-xs font-bold text-blue-400 hover:text-blue-300 uppercase tracking-widest flex items-center gap-2">
+                    <button 
+                        onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(strategy.socialContent.twitterPost)}`, '_blank')}
+                        className="text-xs font-bold text-blue-400 hover:text-blue-300 uppercase tracking-widest flex items-center gap-2 transition-colors"
+                    >
                          <Icons.Send className="w-3 h-3" /> Opublikuj teraz
                     </button>
                 </div>
@@ -125,20 +154,31 @@ export const ScandalResult: React.FC<Props> = ({ strategy, onReset }) => {
                         <span className="font-bold text-sm">Post na Facebook</span>
                     </div>
                     <p className="text-slate-200 mb-4 whitespace-pre-line">{strategy.socialContent.facebookPost}</p>
-                    <button className="text-xs font-bold text-[#1877F2] hover:text-blue-300 uppercase tracking-widest flex items-center gap-2">
-                         <Icons.Send className="w-3 h-3" /> Opublikuj teraz
+                    <button 
+                         onClick={() => navigator.clipboard.writeText(strategy.socialContent.facebookPost).then(() => alert('Skopiowano post na Facebooka!'))}
+                         className="text-xs font-bold text-[#1877F2] hover:text-blue-300 uppercase tracking-widest flex items-center gap-2 transition-colors"
+                    >
+                         <Icons.Send className="w-3 h-3" /> Kopiuj do schowka
                     </button>
                 </div>
             </div>
         )}
 
         {/* Action Buttons Footer */}
-        <div className="flex gap-4 pt-6 border-t border-slate-800 mt-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-800 mt-4">
           <button 
             onClick={onReset}
-            className="px-6 py-3 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="w-full sm:w-auto px-6 py-3 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             Nowe Zgłoszenie
+          </button>
+          
+          <button 
+            onClick={handleShare}
+            className="w-full sm:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-bold flex items-center justify-center gap-2 transition-colors border border-slate-700 group"
+          >
+            <Icons.Share className="w-4 h-4 group-hover:text-blue-400 transition-colors" />
+            <span className="uppercase text-xs tracking-wider">Udostępnij Kampanię</span>
           </button>
         </div>
 
