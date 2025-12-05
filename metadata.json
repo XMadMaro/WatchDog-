@@ -1,0 +1,7 @@
+{
+  "name": "Miejski Watchdog AI",
+  "description": "A tool that monitors social signals, analyzes city issues using AI, and generates high-impact campaigns to force authority action.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
